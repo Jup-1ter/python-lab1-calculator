@@ -13,3 +13,10 @@ PRECEDENCE = {
     "u-": 3,
     "**": 4,
 }
+
+LENGTH_TO_METERS = {"mm": 0.001, "cm": 0.01, "m": 1.0, "km": 1000.0}
+MASS_TO_KILOGRAMS = {"g": 0.001, "kg": 1.0}
+
+# Кельвины = (значение + сдвиг) * масштаб
+TEMPERATURE_OFFSETS = {"c": 273.15, "f": 459.67, "k": 0.0}
+TEMPERATURE_SCALES = {"c": 1.0, "f": 5 / 9, "k": 1.0}

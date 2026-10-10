@@ -13,8 +13,16 @@ dependencies = []
 where = ["src"]
 
 [dependency-groups]
-dev = ["pytest"]
+dev = ["pytest", "pytest-cov", "mypy", "ruff", "pre-commit"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+disallow_untyped_defs = true

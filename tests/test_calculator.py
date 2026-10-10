@@ -3,7 +3,12 @@ from decimal import Decimal
 import pytest
 
 from toolkit.calculator import evaluate, format_result, tokenize
-from toolkit.errors import CalculationError, ExpressionError, InputError
+from toolkit.errors import (
+    CalculationError,
+    DivisionByZeroError,
+    ExpressionError,
+    InputError,
+)
 
 
 @pytest.mark.parametrize(
@@ -24,9 +29,15 @@ from toolkit.errors import CalculationError, ExpressionError, InputError
         ("-(2+3)", "-5"),
         ("2 ** -1", "0.5"),
         ("-2 ** 2", "-4"),
+        ("2 ** 3 ** 2", "512"),
         ("7 // 3", "2"),
+        ("-7 // 3", "-3"),
+        ("7 // -3", "-2"),
         ("7 % 3", "1"),
+        ("-7 % 3", "2"),
+        ("7 % -3", "1"),
         ("7.5 // 2", "3"),
+        ("-7.5 % 2", "0.5"),
     ],
 )
 def test_evaluate_returns_expected_value(expression: str, expected: str) -> None:
@@ -60,6 +71,7 @@ def test_tokenize_marks_unary_operators() -> None:
         ("OP", "u-"),
         ("NUM", Decimal(3)),
     ]
+    assert tokenize("(1)-2")[3] == ("OP", "-")
 
 
 def test_tokenize_joins_double_operators() -> None:
@@ -101,6 +113,13 @@ def test_evaluate_wrong_token_order_raises_error(expression: str) -> None:
 def test_evaluate_unbalanced_parentheses_raises_error(expression: str) -> None:
     """Несбалансированные скобки дают ошибку."""
     with pytest.raises(ExpressionError):
+        evaluate(expression)
+
+
+@pytest.mark.parametrize("expression", ["1 / 0", "5 % 0", "5 // 0", "0 ** -1"])
+def test_evaluate_division_by_zero_raises_error(expression: str) -> None:
+    """Деление на ноль во всех видах даёт ошибку."""
+    with pytest.raises(DivisionByZeroError):
         evaluate(expression)
 
 

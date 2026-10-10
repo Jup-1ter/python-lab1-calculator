@@ -7,12 +7,19 @@ from toolkit.constants import (
     PRECEDENCE,
     ROUNDING_STEP,
 )
-from toolkit.errors import CalculationError, ExpressionError, InputError
+from toolkit.errors import (
+    CalculationError,
+    DivisionByZeroError,
+    ExpressionError,
+    InputError,
+)
 
 type Tokens = list[tuple[str, Decimal | str]]
 
 def should_pop(top: str, new: str) -> bool:
     """True, если оператор с вершины стека нужно вытолкнуть перед новым"""
+    if new == "**": # правоассоц.
+        return PRECEDENCE[top] > PRECEDENCE[new]
     return PRECEDENCE[top] >= PRECEDENCE[new]
 
 
@@ -22,7 +29,7 @@ def is_unary_position(tokens: Tokens) -> bool:
         return True
 
     kind, value = tokens[-1]
-    return kind == "OP"
+    return kind == "OP" and value != ")"
 
 
 def tokenize(expr: str) -> Tokens:
@@ -109,6 +116,28 @@ def validate(tokens: Tokens) -> None:
         raise ExpressionError("Несбалансированные скобки")
 
 
+def _euclid_divmod(a: Decimal, b: Decimal) -> tuple[Decimal, Decimal]:
+    """Евклидово деление: a = q*b + r, 0 <= r < |b|, q целое."""
+    if b == 0:
+        raise DivisionByZeroError("Деление на ноль")
+
+    q, r = divmod(a, b)
+    if r < 0:
+        r += abs(b)
+        q += -1 if b > 0 else 1
+    return q, r
+
+
+def quotient(a: Decimal, b: Decimal) -> Decimal:
+    """Неполное частное."""
+    return _euclid_divmod(a, b)[0]
+
+
+def remainder(a: Decimal, b: Decimal) -> Decimal:
+    """Остаток от деления."""
+    return _euclid_divmod(a, b)[1]
+
+
 def apply_operator(symbol: str, left: Decimal, right: Decimal) -> Decimal:
     """Применяет бинарный оператор к двум числам"""
     match symbol:
@@ -119,12 +148,16 @@ def apply_operator(symbol: str, left: Decimal, right: Decimal) -> Decimal:
         case "*":
             return left * right
         case "/":
+            if right == 0:
+                raise DivisionByZeroError("Деление на ноль")
             return left / right
         case "//":
-            return left // right
+            return quotient(left, right)
         case "%":
-            return left % right
+            return remainder(left, right)
         case _: # **
+            if left == 0 and right < 0:
+                raise DivisionByZeroError("Деление на ноль")
             return left**right
 
 

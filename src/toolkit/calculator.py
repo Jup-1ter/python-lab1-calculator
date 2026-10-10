@@ -1,6 +1,12 @@
 from decimal import Decimal, DecimalException, InvalidOperation
 
-from toolkit.constants import BINARY_OPERATORS, DIGITS, OPERATOR_CHARS, PRECEDENCE
+from toolkit.constants import (
+    BINARY_OPERATORS,
+    DIGITS,
+    OPERATOR_CHARS,
+    PRECEDENCE,
+    ROUNDING_STEP,
+)
 from toolkit.errors import CalculationError, ExpressionError, InputError
 
 type Tokens = list[tuple[str, Decimal | str]]
@@ -193,3 +199,12 @@ def evaluate(expression: str) -> Decimal:
         return calculate(tokens)
     except DecimalException:
         raise CalculationError("Ошибка вычисления")
+
+
+def format_result(value: Decimal) -> str:
+    """Округляет результат до 4 знаков и превращает в строку."""
+    rounded = value.quantize(ROUNDING_STEP)
+    text = format(rounded, "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text

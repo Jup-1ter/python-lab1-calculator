@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 
-from toolkit.calculator import evaluate, tokenize
+from toolkit.calculator import evaluate, format_result, tokenize
 from toolkit.errors import CalculationError, ExpressionError, InputError
 
 
@@ -37,6 +37,19 @@ def test_evaluate_returns_expected_value(expression: str, expected: str) -> None
 def test_evaluate_does_not_round_to_four_digits() -> None:
     """Результат evaluate округляется только контекстом Decimal."""
     assert evaluate("1/3") == Decimal("0.3333333333333333333333333333")
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("0.3333333333333333333333333333", "0.3333"),
+        ("4.5000", "4.5"),
+        ("100.0000", "100"),
+    ],
+)
+def test_format_result_returns_expected_text(value: str, expected: str) -> None:
+    """Результат округляется до 4 знаков и печатается без лишних нулей."""
+    assert format_result(Decimal(value)) == expected
 
 
 def test_tokenize_marks_unary_operators() -> None:

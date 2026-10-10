@@ -72,6 +72,8 @@ def convert_with_table(
 
 def convert(value: float, from_unit: str, to_unit: str) -> float:
     """Переводит значение из одной единицы в другую."""
+    from_unit = from_unit.lower()
+    to_unit = to_unit.lower()
     from_group = get_group(from_unit)
     to_group = get_group(to_unit)
     

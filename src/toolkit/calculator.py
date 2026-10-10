@@ -1,8 +1,16 @@
-from decimal import Decimal, DecimalException, InvalidOperation
+from decimal import (
+    ROUND_HALF_UP,
+    Decimal,
+    DecimalException,
+    InvalidOperation,
+    localcontext,
+)
 
 from toolkit.constants import (
     BINARY_OPERATORS,
     DIGITS,
+    EXPONENT_FORMAT,
+    EXPONENT_THRESHOLD,
     OPERATOR_CHARS,
     PRECEDENCE,
     ROUNDING_STEP,
@@ -236,8 +244,15 @@ def evaluate(expression: str) -> Decimal:
 
 def format_result(value: Decimal) -> str:
     """Округляет результат до 4 знаков и превращает в строку."""
-    rounded = value.quantize(ROUNDING_STEP)
+    if abs(value) >= EXPONENT_THRESHOLD:
+        with localcontext() as context:
+            context.rounding = ROUND_HALF_UP
+            return format(value, EXPONENT_FORMAT)
+
+    rounded = value.quantize(ROUNDING_STEP, rounding=ROUND_HALF_UP)
     text = format(rounded, "f")
     if "." in text:
         text = text.rstrip("0").rstrip(".")
+    if text == "-0":
+        return "0"
     return text

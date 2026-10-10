@@ -18,6 +18,8 @@ PRECEDENCE = {
 
 # Округление результата: 4 знака после точки
 ROUNDING_STEP = Decimal("0.0001")
+EXPONENT_FORMAT = ".4e"
+EXPONENT_THRESHOLD = Decimal("1e15")
 
 LENGTH_TO_METERS = {"mm": 0.001, "cm": 0.01, "m": 1.0, "km": 1000.0}
 MASS_TO_KILOGRAMS = {"g": 0.001, "kg": 1.0}

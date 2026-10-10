@@ -10,6 +10,7 @@ from toolkit.errors import InputError, RangeError, UnitError
         (1, "km", "m", 1000),
         (100, "cm", "m", 1),
         (1500, "g", "kg", 1.5),
+        (1, "KM", "M", 1000),
         (0, "c", "k", 273.15),
         (32, "f", "c", 0),
         (-40, "c", "f", -40),

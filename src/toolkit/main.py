@@ -3,6 +3,7 @@ import sys
 from decimal import Decimal
 
 from toolkit.calculator import evaluate, format_result
+from toolkit.constants import DIGITS
 from toolkit.converter import convert, parse_value
 from toolkit.errors import ToolkitError
 
@@ -29,11 +30,27 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def is_negative_number_text(text: str) -> bool:
+    """True, если строка начинается с минуса и цифры или точки."""
+    return len(text) >= 2 and text[0] == "-" and (text[1] in DIGITS or text[1] == ".")
+
+
+def prepare_arguments(argv: list[str]) -> list[str]:
+    """Не даёт argparse принять отрицательное число за опцию."""
+    if len(argv) < 2:
+        return argv
+    if argv[0] == "calc" and argv[1] not in ("-h", "--help") and "--" not in argv:
+        return ["calc", "--", *argv[1:]]
+    if argv[0] == "convert" and is_negative_number_text(argv[1]):
+        return ["convert", *argv[2:], "--", argv[1]]
+    return argv
+
+
 def main(argv: list[str] | None = None) -> int:
     """Запускает команду и возвращает код выхода."""
     if argv is None:
         argv = sys.argv[1:]
-    args = build_parser().parse_args(argv)
+    args = build_parser().parse_args(prepare_arguments(argv))
 
     try:
         if args.command == "calc":

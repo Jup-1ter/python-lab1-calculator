@@ -25,6 +25,13 @@ def test_cli_calc_prints_result() -> None:
     assert result.stdout.strip() == "5"
 
 
+def test_cli_calc_negative_expression_works_without_separator() -> None:
+    """Выражение с минусом в начале работает без --."""
+    result = run_cli("calc", "-5+2")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "-3"
+
+
 def test_cli_calc_division_by_zero_returns_error() -> None:
     """Ошибка вычисления даёт код 2 и сообщение в stderr."""
     result = run_cli("calc", "1 / 0")
@@ -45,6 +52,20 @@ def test_cli_convert_prints_result() -> None:
     result = run_cli("convert", "100", "--from", "cm", "--to", "m")
     assert result.returncode == 0
     assert result.stdout.strip() == "1"
+
+
+def test_cli_convert_negative_value_and_uppercase_units() -> None:
+    """Отрицательное значение и заглавные единицы работают."""
+    result = run_cli("convert", "-40", "--from", "C", "--to", "F")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "-40"
+
+
+def test_cli_convert_negative_value_with_trailing_dot() -> None:
+    """Значение вида -5. переносится в конец и разбирается."""
+    result = run_cli("convert", "-5.", "--from", "c", "--to", "f")
+    assert result.returncode == 0
+    assert result.stdout.strip() == "23"
 
 
 def test_cli_convert_incompatible_units_returns_error() -> None:
